@@ -1,15 +1,14 @@
 import React, {useState, useRef} from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Camera, CameraType } from 'expo-camera';
+import MlkitOcr, { MlkitOcrResult } from 'react-native-mlkit-ocr';
 
 export default function App() {
-  const [loading, setLoading] = React.useState<boolean>(false);
-  // const [result, setResult] = React.useState<
-  //   Types.MlkitOcrResult | undefined
-  //   >();
-  const [result, setResult] = React.useState<any>();
+  const [result, setResult] = React.useState<
+    MlkitOcrResult | undefined
+    >();
   const [image, setImage] = React.useState<any>();
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [_permission, _requestPermission] = Camera.useCameraPermissions();
   const [type, setType] = useState(CameraType.back);
   const cameraRef = useRef(null)
 
@@ -25,12 +24,11 @@ export default function App() {
       const response = await cameraComponent.takePictureAsync()
       try {
         setImage(response);
-        // setResult(await MlkitOcr.detectFromUri(response.assets[0].uri));
-        setResult([{text: 'some text'}])
+        const uri = response.uri
+        console.error(uri)
+        setResult(await MlkitOcr.detectFromUri(uri));
       } catch (e) {
         console.error(e);
-      } finally {
-        setLoading(false);
       }
     } catch (err) {
       console.error(err)
@@ -61,6 +59,13 @@ export default function App() {
             style={styles.image}
             source={{uri: image.uri}}
           />
+          {result && (
+            <View>
+              {result?.map((item: any, index: number) => (
+                <Text key={index}>{item.text}</Text>
+              ))}
+            </View>
+          )}
         </View>
       )}
     </View>
